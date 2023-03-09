@@ -39,9 +39,19 @@ i = 0
 #     if ret:
 #         cv2.imshow("WinOrigin", frame)
 #         cv2.imshow("WinModified", gray)   
+#         i = i +1
+
+
 
 while True:
+    print(i)
     ret, frame = cap.read()
+
+    if i == 1:
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        video_cod = cv2.VideoWriter_fourcc(*'XVID')
+        video_output = cv2.VideoWriter('temporary/captured_video.mov',video_cod,fps,[gray.shape[1], gray.shape[0]])
+    
     if not ret:
         break   
 
@@ -50,7 +60,7 @@ while True:
 
     gray_croped = gray
     T, act_mod = cv2.threshold(gray_croped, 127, 255, cv2.THRESH_BINARY) 
-
+    i = i +1
     if not buff_ready:
         frame_buff.append(np.copy(act_mod))
         counter = counter + 1
@@ -60,13 +70,15 @@ while True:
     else:
         img_diff = funcs.get_diff(act_mod, frame_buff, counter, BUFF_SIZE)
 
-        cv2.imshow("WinOrigin", act_mod)
-        cv2.imshow("WinDiff", img_diff)
+        # cv2.imshow("WinOrigin", act_mod)
+        # cv2.imshow("WinDiff", img_diff)
 
         ciliates = funcs.recognize_ciliates(act_mod, img_diff)
 
         frame_mod = funcs.highligth(frame, ciliates)
-        cv2.imshow("WinModified", frame_mod)
+        # cv2.imshow("WinModified", frame_mod)
+
+        video_output.write(frame_mod)
 
         frame_buff[counter] = np.copy(act_mod)
         counter = counter + 1
@@ -86,4 +98,5 @@ while True:
 
 
 cap.release()
+video_output.release()
 cv2.destroyAllWindows()

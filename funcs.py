@@ -20,7 +20,6 @@ def get_diff(act, buf, counter, buf_size):
                 if act[y, x] == 255 and pre_frame[y, x] == 255:
                     diff[y, x] = 0    
 
-    print(counter)
     return diff
 
 def recognize_ciliates(frame, diff_frame):
