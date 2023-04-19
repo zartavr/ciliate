@@ -7,7 +7,7 @@ import funcs
 # Участок соединенения двух объемов [450:650, 800:950]
 #-----------------------
 
-cap = cv2.VideoCapture("videos/original_20s.mov")
+cap = cv2.VideoCapture("videos/orig_10s.MOV")
 # cap = cv2.VideoCapture(0)
 
 # ret, frame = cap.read()
@@ -15,6 +15,7 @@ cap = cv2.VideoCapture("videos/original_20s.mov")
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter('temporary/output.mov', fourcc, 20.0, (h, w))
 cv2.namedWindow("WinOrigin", cv2.WINDOW_FREERATIO)
+cv2.namedWindow("WinOriginBin", cv2.WINDOW_FREERATIO)
 cv2.namedWindow("WinModified", cv2.WINDOW_FREERATIO)
 cv2.namedWindow("WinDiff", cv2.WINDOW_FREERATIO)
 
@@ -37,7 +38,7 @@ i = 0
         
 #         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 #     if ret:
-#         cv2.imshow("WinOrigin", frame)
+#         cv2.imshow("WinOriginBin", frame)
 #         cv2.imshow("WinModified", gray)   
 #         i = i +1
 
@@ -55,11 +56,13 @@ while True:
     if not ret:
         break   
 
-    frame = frame[590:700, 800:950]
+    frame = frame[1800:2000, 800:1200]
+    cv2.imshow("WinOrigin", frame)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     gray_croped = gray
-    T, act_mod = cv2.threshold(gray_croped, 127, 255, cv2.THRESH_BINARY) 
+    T, act_mod = cv2.threshold(gray_croped, 100, 255, cv2.THRESH_BINARY) 
+    cv2.imshow("WinOriginBin", act_mod)
     i = i +1
     if not buff_ready:
         frame_buff.append(np.copy(act_mod))
@@ -70,13 +73,12 @@ while True:
     else:
         img_diff = funcs.get_diff(act_mod, frame_buff, counter, BUFF_SIZE)
 
-        # cv2.imshow("WinOrigin", act_mod)
-        # cv2.imshow("WinDiff", img_diff)
+        cv2.imshow("WinDiff", img_diff)
 
         ciliates = funcs.recognize_ciliates(act_mod, img_diff)
 
         frame_mod = funcs.highligth(frame, ciliates)
-        # cv2.imshow("WinModified", frame_mod)
+        cv2.imshow("WinModified", frame_mod)
 
         video_output.write(frame_mod)
 

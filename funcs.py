@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-ITERATE_LIMIT = 10
+ITERATE_LIMIT = 100
 iterate_counter  = 0
 ciliate = []
 
@@ -10,7 +10,7 @@ def get_diff(act, buf, counter, buf_size):
     diff = np.copy(act)
     counter = 0
     for i in range(counter, counter + buf_size):
-        if (i - counter) % 5 == 0:
+        if (i - counter) % 10 != 0:
             continue
         pre_frame = buf[i % buf_size]
         for y in range(0, h):
@@ -40,13 +40,21 @@ def get_ciliate(frame, y, x):
     iterate_counter = 1
     ciliate = []
     get_ciliate_rec(frame, y, x)
-    top_left = [y, x]
-    bottom_right = [y, x]
+    x1 = x
+    x2 = x
+    y1 = y
+    y2 = y
     for pix in ciliate:
-        if pix[0] <= top_left[0] and pix[1] <= top_left[1]:
-            top_left = pix
-        if pix[0] >= bottom_right[0] and pix[1] >= bottom_right[1]:
-            bottom_right = pix
+        if pix[0] <= y1:
+            y1 = pix[0]
+        if pix[1] <= x1:
+            x1 = pix[1]
+        if pix[0] >= y2:
+            y2 = pix[0]
+        if pix[1] >= x2:
+            x2 = pix[1]
+    top_left = [y1, x1]
+    bottom_right = [y2, x2]
     return [top_left, bottom_right]
 
     
@@ -59,8 +67,10 @@ def get_ciliate_rec(frame, y, x):
     if iterate_counter == ITERATE_LIMIT:
         return
     # выход за границы изображения
-    for xi in range(x-1, x+1):
-        for yi in range(y-1, y+1):
+    for xi in range(x-1, x+2):
+        for yi in range(y-1, y+2):
+            if yi > 199 or xi >399 or xi < 0 or yi < 0:
+                continue
             if frame[yi, xi] == 255 and not([yi, xi] in ciliate):
                 get_ciliate_rec(frame, yi, xi)
 
